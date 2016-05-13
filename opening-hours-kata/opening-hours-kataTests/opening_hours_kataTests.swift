@@ -2,7 +2,8 @@ import XCTest
 @testable import opening_hours_kata
 
 class opening_hours_kataTests: XCTestCase {
-    func testExample() {
+
+    func testIfDateIsOnOpeningRangeShopIsOpen() {
         let openingDays: [Day] = [.Monday, .Wednesday, .Friday]
         let openingHours = Shift(openingHour: "08:00", closingHour: "16:00")
         let shop = Shop(openingDays: openingDays, openingHours: openingHours)
@@ -19,10 +20,28 @@ class opening_hours_kataTests: XCTestCase {
 
         XCTAssert(shop.isOpenOn(wednesday!))
     }
+
+    func testIfDateIsNotOnOpeningRangeShopIsClosed() {
+        let openingDays: [Day] = [.Monday, .Wednesday, .Friday]
+        let openingHours = Shift(openingHour: "08:00", closingHour: "16:00")
+        let shop = Shop(openingDays: openingDays, openingHours: openingHours)
+
+        let calendar = NSCalendar(identifier: NSCalendarIdentifierGregorian)
+        let components = NSDateComponents()
+        components.year = 2016
+        components.month = 05
+        components.day = 12
+        components.hour = 12
+        components.minute = 22
+        components.second = 11
+        let thursday = calendar?.dateFromComponents(components)
+
+        XCTAssertFalse(shop.isOpenOn(thursday!))
+    }
 }
 
-enum Day {
-    case Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday
+enum Day: Int {
+    case Sunday = 1, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday
 }
 
 struct Shift {
@@ -40,7 +59,8 @@ class Shop {
     }
 
     func isOpenOn(date: NSDate) -> Bool {
-        return true
+        let weekday = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)!.components(.Weekday, fromDate: date).weekday
+        return openingDays.contains(Day(rawValue: weekday)!)
     }
 
     func nextOpeningDate() -> NSDate {
